@@ -19,30 +19,26 @@ public class MinesweeperGame {
         initializeGame();
         while (true) {
             showBoard();
-            if (gameStatus == 1) {
+            if (doesUserWinTheGame()) {
                 System.out.println("지뢰를 모두 찾았습니다. GAME CLEAR!");
                 break;
             }
-            if (gameStatus == -1) {
+            if (doesUserLoseTheGame()) {
                 System.out.println("지뢰를 밟았습니다. GAME OVER!");
                 break;
             }
-            
-            System.out.println("선택할 좌표를 입력하세요. (예: a1)");
-            String cellInput = scanner.nextLine();
-            System.out.println("선택한 셀에 대한 행위를 선택하세요. (1: 오픈, 2: 깃발 꽂기)");
-            String userActionInput = scanner.nextLine();
-            char cellInputRow = cellInput.charAt(0);
-            char cellInputCol = cellInput.charAt(1);
-            int selectedRowIndex = convertRowFrom(cellInputRow);
-            int selectedColIndex = convertColFrom(cellInputCol);
-            if (userActionInput.equals("2")) {
+
+            String cellInput = getCellInputFromUser(scanner);
+            String userActionInput = getUserActionInputFromUser(scanner);
+            int selectedRowIndex = getSelectedRowIndex(cellInput);
+            int selectedColIndex = getSelectedColIndex(cellInput);
+            if (doesUserChooseToPlantFlag(userActionInput)) {
                 board[selectedColIndex][selectedRowIndex] = "⚑";
                 checkIfGameIsOver();
-            } else if (userActionInput.equals("1")) {
-                if (landMines[selectedColIndex][selectedRowIndex]) {
+            } else if (doesUserChooseToOpenCell(userActionInput)) {
+                if (isLandMineCell(selectedColIndex, selectedRowIndex)) {
                     board[selectedColIndex][selectedRowIndex] = "☼";
-                    gameStatus = -1;
+                    changeGameStatusToLose();
                     continue;
                 } else {
                     open(selectedColIndex, selectedRowIndex);
@@ -54,11 +50,59 @@ public class MinesweeperGame {
         }
     }
 
+    private static void changeGameStatusToLose() {
+        gameStatus = -1;
+    }
+
+    private static boolean isLandMineCell(int selectedColIndex, int selectedRowIndex) {
+        return landMines[selectedColIndex][selectedRowIndex];
+    }
+
+    private static boolean doesUserChooseToOpenCell(String userActionInput) {
+        return userActionInput.equals("1");
+    }
+
+    private static boolean doesUserChooseToPlantFlag(String userActionInput) {
+        return userActionInput.equals("2");
+    }
+
+    private static int getSelectedColIndex(String cellInput) {
+        char cellInputCol = cellInput.charAt(1);
+        return convertColFrom(cellInputCol);
+    }
+
+    private static int getSelectedRowIndex(String cellInput) {
+        char cellInputRow = cellInput.charAt(0);
+        return convertRowFrom(cellInputRow);
+    }
+
+    private static String getUserActionInputFromUser(Scanner scanner) {
+        System.out.println("선택한 셀에 대한 행위를 선택하세요. (1: 오픈, 2: 깃발 꽂기)");
+        return scanner.nextLine();
+    }
+
+    private static String getCellInputFromUser(Scanner scanner) {
+        System.out.println("선택할 좌표를 입력하세요. (예: a1)");
+        return scanner.nextLine();
+    }
+
+    private static boolean doesUserLoseTheGame() {
+        return gameStatus == -1;
+    }
+
+    private static boolean doesUserWinTheGame() {
+        return gameStatus == 1;
+    }
+
     private static void checkIfGameIsOver() {
         boolean isAllOpened = isAllCellOpened();
         if (isAllOpened) {
-            gameStatus = 1;
+            changeGameStatusToWin();
         }
+    }
+
+    private static void changeGameStatusToWin() {
+        gameStatus = 1;
     }
 
     private static boolean isAllCellOpened() {
@@ -132,29 +176,29 @@ public class MinesweeperGame {
             for (int row = 0; row < 10; row++) {
                 int count = 0;
                 // 지뢰가 아닌 칸에서
-                if (!landMines[col][row]) {
-                    if (col - 1 >= 0 && row - 1 >= 0 && landMines[col - 1][row - 1]) {
+                if (!isLandMineCell(col, row)) {
+                    if (col - 1 >= 0 && row - 1 >= 0 && isLandMineCell(col - 1, row - 1)) {
                         count++;
                     }
-                    if (col - 1 >= 0 && landMines[col - 1][row]) {
+                    if (col - 1 >= 0 && isLandMineCell(col - 1, row)) {
                         count++;
                     }
-                    if (col - 1 >= 0 && row + 1 < 10 && landMines[col - 1][row + 1]) {
+                    if (col - 1 >= 0 && row + 1 < 10 && isLandMineCell(col - 1, row + 1)) {
                         count++;
                     }
-                    if (row - 1 >= 0 && landMines[col][row - 1]) {
+                    if (row - 1 >= 0 && isLandMineCell(col, row - 1)) {
                         count++;
                     }
-                    if (row + 1 < 10 && landMines[col][row + 1]) {
+                    if (row + 1 < 10 && isLandMineCell(col, row + 1)) {
                         count++;
                     }
-                    if (col + 1 < 8 && row - 1 >= 0 && landMines[col + 1][row - 1]) {
+                    if (col + 1 < 8 && row - 1 >= 0 && isLandMineCell(col + 1, row - 1)) {
                         count++;
                     }
-                    if (col + 1 < 8 && landMines[col + 1][row]) {
+                    if (col + 1 < 8 && isLandMineCell(col + 1, row)) {
                         count++;
                     }
-                    if (col + 1 < 8 && row + 1 < 10 && landMines[col + 1][row + 1]) {
+                    if (col + 1 < 8 && row + 1 < 10 && isLandMineCell(col + 1, row + 1)) {
                         count++;
                     }
                     landMineCounts[col][row] = count;
@@ -178,7 +222,7 @@ public class MinesweeperGame {
         if (!board[col][row].equals("□")) {
             return;
         }
-        if (landMines[col][row]) {
+        if (isLandMineCell(col, row)) {
             return;
         }
         if (landMineCounts[col][row] != 0) {
