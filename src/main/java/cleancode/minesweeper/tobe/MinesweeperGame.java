@@ -184,38 +184,43 @@ public class MinesweeperGame {
 
         for (int col = 0; col < BOARD_COL_SIZE; col++) {
             for (int row = 0; row < BOARD_ROW_SIZE; row++) {
-                int count = 0;
-                if (!isLandMineCell(col, row)) {
-                    if (col - 1 >= 0 && row - 1 >= 0 && isLandMineCell(col - 1, row - 1)) {
-                        count++;
-                    }
-                    if (col - 1 >= 0 && isLandMineCell(col - 1, row)) {
-                        count++;
-                    }
-                    if (col - 1 >= 0 && row + 1 < BOARD_ROW_SIZE && isLandMineCell(col - 1, row + 1)) {
-                        count++;
-                    }
-                    if (row - 1 >= 0 && isLandMineCell(col, row - 1)) {
-                        count++;
-                    }
-                    if (row + 1 < BOARD_ROW_SIZE && isLandMineCell(col, row + 1)) {
-                        count++;
-                    }
-                    if (col + 1 < BOARD_COL_SIZE && row - 1 >= 0 && isLandMineCell(col + 1, row - 1)) {
-                        count++;
-                    }
-                    if (col + 1 < BOARD_COL_SIZE && isLandMineCell(col + 1, row)) {
-                        count++;
-                    }
-                    if (col + 1 < BOARD_COL_SIZE && row + 1 < BOARD_ROW_SIZE && isLandMineCell(col + 1, row + 1)) {
-                        count++;
-                    }
-                    NEARBY_LAND_MINE_COUNTS[col][row] = count;
+                if (isLandMineCell(col, row)) {
+                    NEARBY_LAND_MINE_COUNTS[col][row] = 0;
                     continue;
                 }
-                NEARBY_LAND_MINE_COUNTS[col][row] = 0;
+                int count = countNearbyLandMines(col, row);
+                NEARBY_LAND_MINE_COUNTS[col][row] = count;
             }
         }
+    }
+
+    private static int countNearbyLandMines(int col, int row) {
+        int count = 0;
+        if (col - 1 >= 0 && row - 1 >= 0 && isLandMineCell(col - 1, row - 1)) {
+            count++;
+        }
+        if (col - 1 >= 0 && isLandMineCell(col - 1, row)) {
+            count++;
+        }
+        if (col - 1 >= 0 && row + 1 < BOARD_ROW_SIZE && isLandMineCell(col - 1, row + 1)) {
+            count++;
+        }
+        if (row - 1 >= 0 && isLandMineCell(col, row - 1)) {
+            count++;
+        }
+        if (row + 1 < BOARD_ROW_SIZE && isLandMineCell(col, row + 1)) {
+            count++;
+        }
+        if (col + 1 < BOARD_COL_SIZE && row - 1 >= 0 && isLandMineCell(col + 1, row - 1)) {
+            count++;
+        }
+        if (col + 1 < BOARD_COL_SIZE && isLandMineCell(col + 1, row)) {
+            count++;
+        }
+        if (col + 1 < BOARD_COL_SIZE && row + 1 < BOARD_ROW_SIZE && isLandMineCell(col + 1, row + 1)) {
+            count++;
+        }
+        return count;
     }
 
     private static void showGateStartComments() {
